@@ -5,6 +5,9 @@
 ### Added
 
 - **Stack rendering (`CosArmorStackRendering`, client, off by default)**: cosmetic armor is drawn on top of real armor instead of replacing it. Approach adapted from [CosmeticArmorReworkedForked](https://github.com/zzik2/CosmeticArmorReworkedForked) by **zzik2** (MMPL 1.0.1), ported to the 26.1 render state/submit pipeline.
+  - The cosmetic set is rendered from a second render state built with the cosmetic pieces equipped, so armor that prepares its own render data during extraction (e.g. GeckoLib armor such as Advanced AE Quantum armor) renders correctly as cosmetic.
+  - The cosmetic pass also re-runs other armor-type layers on the player (vanilla wings and mod layers such as LTXI's Wonderland armor layer), and copies the live pose (including the inventory preview's head rotation) onto the cosmetic state.
+- **Inflate stacked cosmetic armor (`CosArmorInflateCosmetic`, client, on by default)**: when stacking, vanilla-style cosmetic armor is drawn with a slightly larger model so it always shows over real armor of the same shape regardless of draw order.
 
 ## [1.1.5] - 2026-10-30
 

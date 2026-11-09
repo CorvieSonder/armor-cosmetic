@@ -9,8 +9,10 @@ import com.google.common.cache.LoadingCache;
 import com.skd.armorcosmetic.impl.ModConfigs;
 import com.skd.armorcosmetic.impl.ModObjects;
 import com.skd.armorcosmetic.impl.inventory.InventoryCosArmor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +26,7 @@ public enum PlayerRenderHandler {
             EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD
     };
     public static boolean Disabled = false;
+    private static boolean buildingCosmeticState = false;
 
     private final LoadingCache<Object, Deque<Runnable>> cache = CacheBuilder.newBuilder()
             .weakKeys()
@@ -35,6 +38,7 @@ public enum PlayerRenderHandler {
             });
 
     public void onExtractPlayerRenderState(AbstractClientPlayer player, AvatarRenderState renderState, float partialTick) {
+        if (buildingCosmeticState) return;
         Deque<Runnable> restores = cache.getUnchecked(player);
         restoreItems(restores);
 
@@ -68,7 +72,7 @@ public enum PlayerRenderHandler {
     }
 
     public void attachStackedCosmetics(AbstractClientPlayer player, AvatarRenderState renderState) {
-        if (Disabled || !ModConfigs.CosArmorStackRendering.get()) return;
+        if (buildingCosmeticState || Disabled || !ModConfigs.CosArmorStackRendering.get()) return;
 
         InventoryCosArmor cosInventory = getCosInventory(player);
         ItemStack[] stacked = new ItemStack[SLOTS.length];
@@ -83,8 +87,30 @@ public enum PlayerRenderHandler {
             }
         }
 
-        if (any) {
-            renderState.setRenderData(StackedCosmetics.KEY, stacked);
+        if (!any) return;
+
+        Inventory playerInventory = PlayerInventoryHelper.getPlayerInventory(player);
+        Deque<Runnable> restores = new ArrayDeque<>();
+        buildingCosmeticState = true;
+        try {
+            for (int i = 0; i < SLOTS.length; i++) {
+                final int slot = i;
+                PlayerInventoryHelper.getPlayerEquipmentSlotIndex(SLOTS[slot]).ifPresent(slotIndex -> {
+                    ItemStack original = playerInventory.getItem(slotIndex);
+                    restores.add(() -> playerInventory.setItem(slotIndex, original));
+                    playerInventory.setItem(slotIndex, stacked[slot] == null ? ItemStack.EMPTY : stacked[slot]);
+                });
+            }
+
+            EntityRenderState cosmeticState = Minecraft.getInstance().getEntityRenderDispatcher()
+                    .getRenderer(player)
+                    .createRenderState(player, renderState.partialTick);
+            if (cosmeticState instanceof AvatarRenderState avatarState) {
+                renderState.setRenderData(StackedCosmetics.KEY, avatarState);
+            }
+        } finally {
+            restoreItems(restores);
+            buildingCosmeticState = false;
         }
     }
 
@@ -94,6 +120,7 @@ public enum PlayerRenderHandler {
     }
 
     public void onFinishPlayerRenderState(AbstractClientPlayer player, AvatarRenderState renderState, float partialTick) {
+        if (buildingCosmeticState) return;
         restoreItems(cache.getUnchecked(player));
     }
 

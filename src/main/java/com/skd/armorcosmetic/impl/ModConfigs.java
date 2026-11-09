@@ -18,6 +18,7 @@ public class ModConfigs {
     public static IntValue CosArmorCreativeGuiButton_Left;
     public static IntValue CosArmorCreativeGuiButton_Top;
     public static BooleanValue CosArmorStackRendering;
+    public static BooleanValue CosArmorInflateCosmetic;
     public static BooleanValue CosArmorKeepThroughDeath;
     public static BooleanValue CosArmorDisableRecipeBook;
     public static BooleanValue CosArmorDisableCosHatCommand;
@@ -58,6 +59,9 @@ public class ModConfigs {
         CosArmorStackRendering = clientBuilder.comment("Stack the render for cosmetic armor on top of regular armor, instead of replacing it")
                 .translation("cos.config.CosArmorStackRendering")
                 .define("CosArmorStackRendering", false);
+        CosArmorInflateCosmetic = clientBuilder.comment("When stacking, draw vanilla-style cosmetic armor slightly larger so it always shows over real armor of the same shape")
+                .translation("cos.config.CosArmorInflateCosmetic")
+                .define("CosArmorInflateCosmetic", true);
         clientBuilder.pop();
         CLIENT_SPEC = clientBuilder.build();
 

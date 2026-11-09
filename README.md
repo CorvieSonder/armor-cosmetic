@@ -9,7 +9,7 @@ Wear two sets of armor — one for function, one for fashion. Armor Cosmetic let
 - **Dual armor system**: Wear one armor set for protection stats, another purely for display. Your real armor stays equipped underneath.
 - **Cosmetic inventory GUI**: Open the cosmetic armor screen from your normal inventory with a single button click.
 - **Per-slot toggles**: Each cosmetic slot has an S/A toggle that hides your real armor for that slot.
-- **Stack rendering (optional)**: Enable `CosArmorStackRendering` in the client config to draw cosmetic armor on top of your real armor instead of replacing it.
+- **Stack rendering (optional)**: Enable `CosArmorStackRendering` in the client config to draw cosmetic armor on top of your real armor instead of replacing it. Works with custom-rendered armor such as GeckoLib armor and armor drawn by its own render layer. `CosArmorInflateCosmetic` (on by default) draws vanilla-style cosmetic armor slightly larger so it always shows over real armor of the same shape.
 - **Global toggle**: Disable all cosmetic rendering with one click — useful for PvP.
 - **Corail Tombstone compatible**: With Tombstone installed your cosmetic gear isn't lost on death — captured with the rest of your loot on 26.x.
 - **11 languages**: English, Spanish, German, French, Japanese, Portuguese, Russian, Chinese, Korean, Turkish, Czech.
