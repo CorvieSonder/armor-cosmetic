@@ -1,15 +1,59 @@
 package com.skd.armorcosmetic;
 
+import com.skd.armorcosmetic.impl.client.CosmeticStackArmorLayer;
+import com.skd.armorcosmetic.impl.client.PlayerRenderHandler;
+import net.minecraft.client.entity.ClientAvatarEntity;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.player.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.ArmorModelSet;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.world.entity.Avatar;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.renderstate.AvatarRenderStateModifier;
+import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 
 @Mod(value = ArmorCosmetic.MODID, dist = Dist.CLIENT)
 public class ArmorCosmeticClient {
 
-    public ArmorCosmeticClient(ModContainer container) {
+    public ArmorCosmeticClient(IEventBus modEventBus, ModContainer container) {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+        modEventBus.addListener(ArmorCosmeticClient::addLayers);
+        modEventBus.addListener(ArmorCosmeticClient::registerRenderStateModifiers);
+    }
+
+    private static void registerRenderStateModifiers(RegisterRenderStateModifiersEvent event) {
+        event.registerAvatarEntityModifier(new AvatarRenderStateModifier() {
+            @Override
+            public <T extends Avatar & ClientAvatarEntity> void accept(T avatar, AvatarRenderState renderState) {
+                if (avatar instanceof AbstractClientPlayer player) {
+                    PlayerRenderHandler.INSTANCE.attachStackedCosmetics(player, renderState);
+                }
+            }
+        });
+    }
+
+    private static void addLayers(EntityRenderersEvent.AddLayers event) {
+        EntityRendererProvider.Context context = event.getContext();
+        for (PlayerModelType type : event.getSkins()) {
+            AvatarRenderer<AbstractClientPlayer> renderer = event.getPlayerRenderer(type);
+            if (renderer == null) continue;
+            boolean slim = type == PlayerModelType.SLIM;
+            HumanoidArmorLayer<AvatarRenderState, PlayerModel, PlayerModel> armor = new HumanoidArmorLayer<>(
+                    renderer,
+                    ArmorModelSet.bake(slim ? ModelLayers.PLAYER_SLIM_ARMOR : ModelLayers.PLAYER_ARMOR, context.getModelSet(), part -> new PlayerModel(part, slim)),
+                    context.getEquipmentRenderer());
+            renderer.addLayer(new CosmeticStackArmorLayer(renderer, armor));
+        }
     }
 }

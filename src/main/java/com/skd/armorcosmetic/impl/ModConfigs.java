@@ -17,6 +17,7 @@ public class ModConfigs {
     public static BooleanValue CosArmorCreativeGuiButton_Hidden;
     public static IntValue CosArmorCreativeGuiButton_Left;
     public static IntValue CosArmorCreativeGuiButton_Top;
+    public static BooleanValue CosArmorStackRendering;
     public static BooleanValue CosArmorKeepThroughDeath;
     public static BooleanValue CosArmorDisableRecipeBook;
     public static BooleanValue CosArmorDisableCosHatCommand;
@@ -54,6 +55,9 @@ public class ModConfigs {
         CosArmorCreativeGuiButton_Top = clientBuilder.comment("The vertical pixel distance from the origin point of creative inventoy gui")
                 .translation("cos.config.CosArmorCreativeGuiButton_Top")
                 .defineInRange("CosArmorCreativeGuiButton_Top", 38, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        CosArmorStackRendering = clientBuilder.comment("Stack the render for cosmetic armor on top of regular armor, instead of replacing it")
+                .translation("cos.config.CosArmorStackRendering")
+                .define("CosArmorStackRendering", false);
         clientBuilder.pop();
         CLIENT_SPEC = clientBuilder.build();
 

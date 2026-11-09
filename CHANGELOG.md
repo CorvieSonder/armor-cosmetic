@@ -1,5 +1,11 @@
 # Armor Cosmetic - Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Stack rendering (`CosArmorStackRendering`, client, off by default)**: cosmetic armor is drawn on top of real armor instead of replacing it. Approach adapted from [CosmeticArmorReworkedForked](https://github.com/zzik2/CosmeticArmorReworkedForked) by **zzik2** (MMPL 1.0.1), ported to the 26.1 render state/submit pipeline.
+
 ## [1.1.5] - 2026-10-30
 
 ### Changed

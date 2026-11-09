@@ -6,6 +6,7 @@ import java.util.Deque;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.skd.armorcosmetic.impl.ModConfigs;
 import com.skd.armorcosmetic.impl.ModObjects;
 import com.skd.armorcosmetic.impl.inventory.InventoryCosArmor;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -48,8 +49,8 @@ public enum PlayerRenderHandler {
 
         if (Disabled) return;
 
-        InventoryCosArmor cosInventory = (InventoryCosArmor) ((com.skd.armorcosmetic.impl.InventoryManager) ModObjects.invMan)
-                .getCosArmorInventoryClient(player.getUUID());
+        InventoryCosArmor cosInventory = getCosInventory(player);
+        boolean stacking = ModConfigs.CosArmorStackRendering.get();
 
         for (int i = 0; i < SLOTS.length; i++) {
             final int slot = i;
@@ -58,12 +59,38 @@ public enum PlayerRenderHandler {
                     playerInventory.setItem(slotIndex, ItemStack.EMPTY);
                 } else {
                     ItemStack stack = cosInventory.getStackInSlot(slot).copy();
-                    if (!stack.isEmpty()) {
+                    if (!stack.isEmpty() && !stacking) {
                         playerInventory.setItem(slotIndex, stack);
                     }
                 }
             });
         }
+    }
+
+    public void attachStackedCosmetics(AbstractClientPlayer player, AvatarRenderState renderState) {
+        if (Disabled || !ModConfigs.CosArmorStackRendering.get()) return;
+
+        InventoryCosArmor cosInventory = getCosInventory(player);
+        ItemStack[] stacked = new ItemStack[SLOTS.length];
+        boolean any = false;
+
+        for (int slot = 0; slot < SLOTS.length; slot++) {
+            if (cosInventory.isSkinArmor(slot)) continue;
+            ItemStack stack = cosInventory.getStackInSlot(slot);
+            if (!stack.isEmpty()) {
+                stacked[slot] = stack.copy();
+                any = true;
+            }
+        }
+
+        if (any) {
+            renderState.setRenderData(StackedCosmetics.KEY, stacked);
+        }
+    }
+
+    private static InventoryCosArmor getCosInventory(AbstractClientPlayer player) {
+        return (InventoryCosArmor) ((com.skd.armorcosmetic.impl.InventoryManager) ModObjects.invMan)
+                .getCosArmorInventoryClient(player.getUUID());
     }
 
     public void onFinishPlayerRenderState(AbstractClientPlayer player, AvatarRenderState renderState, float partialTick) {

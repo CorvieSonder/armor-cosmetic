@@ -1,4 +1,5 @@
 {
+  "cos.config.CosArmorStackRendering": "Stack Cosmetic Armor Render",
   "cos.key.opencosarmorinventory": "Open Cosmetic Armor Inventory",
   "cos.gui.buttoncos": "Cosmetic Armor",
   "cos.gui.buttonnormal": "Close",
